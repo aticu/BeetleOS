@@ -1,0 +1,10 @@
+cargo-features = ["edition"]
+
+[package]
+name = "kernel"
+version = "0.1.0"
+authors = ["aticu <15schnic@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+efi = { git = "https://github.com/reynoldsbd/libefi" }
