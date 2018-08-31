@@ -1,12 +1,12 @@
 # BeetleOS
 An experimental operating system written in [Rust][5]. A rewrite of [VeOS][8].
 
-## Trying BeetleOS
-To run BeetleOS on a fresh Ubuntu install (tested on 18.04 LTS) take the following steps:
+## Trying BeetleOS for yourself
+To run BeetleOS on a fresh Ubuntu install (tested on 18.04 LTS) take the following steps (adjust the steps for your operating system):
 
 Install build dependencies and qemu to run BeetleOS:
 ```
-$ sudo apt install curl gcc git make lld xorriso qemu
+$ sudo apt install curl gcc git make lld xorriso ovmf qemu
 ```
 
 Install Rust (you can use the default settings):
@@ -15,20 +15,26 @@ $ curl https://sh.rustup.rs -sSf | sh
 ```
 Then relog to have Rust added to the PATH variable.
 
-Install xargo and the Rust source code to cross compile the [core][9]-library:
+Install xargo to cross compile the [core][9]-library:
 ```
 $ cargo install xargo
 $ rustup component add rust-src
 ```
 
-Download BeetleOS:
+Download BeetleOS and change to its folder:
 ```
 $ git clone https://github.com/aticu/BeetleOS.git
+$ cd BeetleOS
+```
+
+Install the correct version of the Rust compiler needed for BeetleOS and the Rust source code for cross compiling:
+```
+$ rustup update $(cat rust-toolchain)
+$ rustup component add rust-src
 ```
 
 And finally run it:
 ```
-$ cd BeetleOS
 $ make run
 ```
 
