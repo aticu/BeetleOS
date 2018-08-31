@@ -29,12 +29,6 @@ use super::{disable_preemption, PreemptionState};
 /// appropriate
 /// - No lock poisoning. When a fail occurs when the lock is held, no
 /// guarantees are made
-///
-/// When calling rust functions from bare threads, such as C `pthread`s, this
-/// lock will be very
-/// helpful. In other cases however, you are encouraged to use the locks from
-/// the standard
-/// library.
 pub struct Mutex<T: ?Sized> {
     lock: AtomicBool,
     data: UnsafeCell<T>

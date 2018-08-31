@@ -11,7 +11,7 @@ ISO := $(BUILD_DIR)/image.iso
 RUST_COMPILER_FLAGS :=
 RUST_COMPILER := xargo
 
-OVMF ?= /usr/share/ovmf/x64/OVMF_CODE.fd
+OVMF ?= /usr/share/ovmf/OVMF.fd
 QEMU_FLAGS := --no-reboot \
 			  -smp cores=4 \
 			  -s \

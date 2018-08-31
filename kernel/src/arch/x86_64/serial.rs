@@ -25,6 +25,7 @@ pub fn write_fmt(args: fmt::Arguments) {
     SERIAL.lock().write_fmt(args).expect("Could not write to serial.")
 }
 
+/// Print to the serial output.
 #[macro_export]
 macro_rules! serial_print {
     ($($arg:tt)*) => {
@@ -32,6 +33,7 @@ macro_rules! serial_print {
     };
 }
 
+/// Print a line to the serial output.
 #[macro_export]
 macro_rules! serial_println {
     () => (serial_print!("\n"));

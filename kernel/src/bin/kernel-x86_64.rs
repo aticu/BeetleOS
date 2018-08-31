@@ -1,4 +1,4 @@
-#![feature(panic_implementation)]
+#![feature(panic_handler)]
 #![no_std]
 #![no_main]
 
@@ -18,7 +18,7 @@ pub extern "C" fn efi_main(image_handle: Handle, system_table: EfiRt<SystemTable
 }
 
 /// The panic implementation of BeetleOS.
-#[panic_implementation]
+#[panic_handler]
 fn panic_fmt(panic_info: &PanicInfo) -> ! {
     println!("{}", panic_info);
 
