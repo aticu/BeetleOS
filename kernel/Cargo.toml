@@ -7,4 +7,9 @@ authors = ["aticu <15schnic@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+
+[target.'cfg(target_arch = "x86_64")'.dependencies]
 efi = { git = "https://github.com/reynoldsbd/libefi" }
+uart_16550 = "0.1.0"
+x86_64 = "0.2.11"
+lazy_static = { version = "1.1.0", features = ["spin_no_std"] }
