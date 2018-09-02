@@ -18,7 +18,6 @@ Then relog to have Rust added to the PATH variable.
 Install xargo to cross compile the [core][9]-library:
 ```
 $ cargo install xargo
-$ rustup component add rust-src
 ```
 
 Download BeetleOS and change to its folder:
@@ -36,6 +35,11 @@ $ rustup component add rust-src
 And finally run it:
 ```
 $ make run
+```
+
+Or you can run integration tests with:
+```
+$ make test
 ```
 
 ## Acknowledgements
