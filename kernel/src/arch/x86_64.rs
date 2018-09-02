@@ -3,6 +3,7 @@
 //! This abstracts the details of the x86_64 platform.
 
 pub mod uefi;
+#[macro_use]
 pub mod serial;
 
 use core::fmt;
@@ -22,11 +23,7 @@ static mut BOOT_METHOD: Option<BootMethod> = None;
 /// Returns the current boot method.
 fn get_boot_method() -> &'static BootMethod {
     // This is safe under the assumption that the boot method will be set early on (before this is called) and never changed.
-    unsafe {
-        BOOT_METHOD
-            .as_ref()
-            .expect("Could not read boot method.")
-    }
+    unsafe { BOOT_METHOD.as_ref().expect("Could not read boot method.") }
 }
 
 /// The struct that implements the architecture trait and repressents this architecture.
@@ -57,4 +54,33 @@ impl Architecture for x86_64 {
     fn disable_interrupts() {
         interrupts::disable()
     }
+}
+
+/// Exits qemu during an integration test.
+#[cfg(all(feature = "integration_test", feature = "qemu"))]
+pub fn exit_integration_test(exit_code: IntegrationTestExitCode) -> ! {
+    use x86_64::instructions::port::Port;
+
+    let mut exit_port = Port::<u32>::new(0xf4);
+
+    unsafe {
+        match exit_code {
+            IntegrationTestExitCode::Success => exit_port.write(0),
+            IntegrationTestExitCode::Failure(message) => {
+                serial_print!("{}", message);
+                exit_port.write(1)
+            }
+        }
+    }
+
+    unreachable!("qemu should have exited now!");
+}
+
+/// The possible exit codes for integration tests.
+#[cfg(feature = "integration_test")]
+pub enum IntegrationTestExitCode {
+    /// The test was successful.
+    Success,
+    /// The test failed.
+    Failure(&'static str),
 }

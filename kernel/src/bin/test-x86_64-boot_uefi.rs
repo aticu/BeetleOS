@@ -1,6 +1,6 @@
-//! This binary is what starts the actual kernel on x86_64.
+//! This binary runs the boot_uefi test.
 //!
-//! Most of the actual kernel code can be found in the library.
+//! This test makes sure that the system boots properly using UEFI.
 
 #![feature(panic_handler)]
 #![no_std]
@@ -11,20 +11,24 @@ use efi::{
     types::{EfiRt, Handle},
     SystemTable,
 };
-use kernel::{arch::x86_64::uefi::uefi_start, println};
+use kernel::{
+    arch::x86_64::{exit_integration_test, IntegrationTestExitCode},
+    serial_println,
+};
 
 /// The entry point for the UEFI loader.
 ///
 /// This is the first function that gets called by the UEFI firmware.
 #[no_mangle]
 pub extern "C" fn efi_main(image_handle: Handle, system_table: EfiRt<SystemTable>) -> ! {
-    uefi_start(image_handle, system_table);
+    exit_integration_test(IntegrationTestExitCode::Success);
 }
 
-/// The panic implementation of BeetleOS.
+/// The panic implementation of the boot_uefi test.
 #[panic_handler]
 fn panic_fmt(panic_info: &PanicInfo) -> ! {
-    println!("{}", panic_info);
+    serial_println!("{}", panic_info);
+    exit_integration_test(IntegrationTestExitCode::Failure(""));
 
     loop {}
 }

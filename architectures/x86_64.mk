@@ -4,7 +4,7 @@ $(ESP_IMAGE): $(TARGET_FILES)
 	mkdir -p $(TARGET_DIR)/boot/EFI/BOOT
 	cp $(KERNEL) $(TARGET_DIR)/boot/EFI/BOOT/BOOTX64.EFI
 	dd if=/dev/zero of=$@ bs=1M count=64
-	mkfs.vfat -F 32 $@ -n EFISys
+	mkfs.vfat -F 32 $@ -n EFISYS
 	mcopy -i $@ -s $(TARGET_DIR)/boot/EFI ::
 
 $(ISO): $(ESP_IMAGE)

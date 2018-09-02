@@ -1,6 +1,7 @@
 [workspace]
 members = [
-    "kernel"
+    "kernel",
+    "test_runner"
 ]
 
 [profile.dev]

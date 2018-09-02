@@ -8,8 +8,8 @@ use efi::{
     SystemTable,
 };
 
-use crate::main;
 use super::{BootMethod, BOOT_METHOD};
+use crate::main;
 
 /// A reference to the UEFI system table.
 static mut SYSTEM_TABLE: Option<EfiRt<SystemTable>> = None;

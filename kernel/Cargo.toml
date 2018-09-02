@@ -10,6 +10,10 @@ keywords = ["OS", "operating", "system", "BeetleOS", "kernel", "no_std"]
 license = "MIT"
 edition = "2018"
 
+[features]
+integration_test = []
+qemu = []
+
 [dependencies]
 lazy_static = { version = "1.1.0", features = ["spin_no_std"] }
 

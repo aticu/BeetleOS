@@ -7,20 +7,20 @@ pub use self::mutex::Mutex;
 use crate::arch::{Arch, Architecture};
 
 /// Saves the state when disabling preemtion, so it can be restored later when dropping.
-/// 
+///
 /// When the `PreemptionState` is dropped, it is restored. In the very rare case this is not wanted,
 /// it is possible to call `core::mem::forget` on the `PreemptionState`.
 #[derive(Debug, Default)]
 pub struct PreemptionState {
     /// Saves whether interrupts were allowed, when preemtion was disabled.
-    interrupts_enabled: bool
+    interrupts_enabled: bool,
 }
 
 impl PreemptionState {
     /// Reads the current state of preemptability.
     fn current() -> PreemptionState {
         PreemptionState {
-            interrupts_enabled: Arch::interrupts_enabled()
+            interrupts_enabled: Arch::interrupts_enabled(),
         }
     }
 }

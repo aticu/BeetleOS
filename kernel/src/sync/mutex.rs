@@ -10,7 +10,7 @@ use core::{
     marker::Sync,
     ops::{Deref, DerefMut, Drop},
     option::Option::{self, None, Some},
-    sync::atomic::{AtomicBool, ATOMIC_BOOL_INIT, Ordering, spin_loop_hint},
+    sync::atomic::{spin_loop_hint, AtomicBool, Ordering, ATOMIC_BOOL_INIT},
 };
 
 use super::{disable_preemption, PreemptionState};
@@ -31,7 +31,7 @@ use super::{disable_preemption, PreemptionState};
 /// guarantees are made
 pub struct Mutex<T: ?Sized> {
     lock: AtomicBool,
-    data: UnsafeCell<T>
+    data: UnsafeCell<T>,
 }
 
 /// A guard to which the protected data can be accessed
@@ -40,7 +40,7 @@ pub struct Mutex<T: ?Sized> {
 pub struct MutexGuard<'a, T: ?Sized + 'a> {
     lock: &'a AtomicBool,
     _preemption_state: PreemptionState,
-    data: &'a mut T
+    data: &'a mut T,
 }
 
 // Same unsafe impls as `std::sync::Mutex`
@@ -52,7 +52,7 @@ impl<T> Mutex<T> {
     pub const fn new(user_data: T) -> Mutex<T> {
         Mutex {
             lock: ATOMIC_BOOL_INIT,
-            data: UnsafeCell::new(user_data)
+            data: UnsafeCell::new(user_data),
         }
     }
 
@@ -98,12 +98,12 @@ impl<T: ?Sized> Mutex<T> {
             lock: &self.lock,
             _preemption_state: preemption_state,
             // This is safe, because the data is protected by the lock
-            data: unsafe { &mut *self.data.get() }
+            data: unsafe { &mut *self.data.get() },
         }
     }
 
     /// Tries to lock the mutex.
-    /// 
+    ///
     /// If it is already locked, it will return None.
     /// Otherwise it returns a guard within Some.
     pub fn try_lock(&self) -> Option<MutexGuard<T>> {
@@ -116,7 +116,7 @@ impl<T: ?Sized> Mutex<T> {
                 lock: &self.lock,
                 _preemption_state: preemption_state,
                 // This is safe, because the data is protected by the lock
-                data: unsafe { &mut *self.data.get() }
+                data: unsafe { &mut *self.data.get() },
             })
         } else {
             None
@@ -128,7 +128,7 @@ impl<T: ?Sized + fmt::Debug> fmt::Debug for Mutex<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.try_lock() {
             Some(guard) => write!(f, "Mutex {{ data: {:?} }}", &*guard),
-            None => write!(f, "Mutex {{ <locked> }}")
+            None => write!(f, "Mutex {{ <locked> }}"),
         }
     }
 }
