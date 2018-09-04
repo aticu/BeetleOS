@@ -24,6 +24,8 @@ pub extern "C" fn efi_main(image_handle: Handle, system_table: EfiRt<SystemTable
 /// The panic implementation of BeetleOS.
 #[panic_handler]
 fn panic_fmt(panic_info: &PanicInfo) -> ! {
+    log::error!("Panic:");
+
     println!("{}", panic_info);
 
     loop {}

@@ -8,7 +8,7 @@ use efi::{
     SystemTable,
 };
 
-use super::{BootMethod, BOOT_METHOD};
+use super::{early_init, BootMethod, BOOT_METHOD};
 use crate::main;
 
 /// A reference to the UEFI system table.
@@ -22,6 +22,7 @@ pub fn uefi_start(_image_handle: Handle, system_table: EfiRt<SystemTable>) -> ! 
         SYSTEM_TABLE.get_or_insert(system_table);
         BOOT_METHOD.get_or_insert(BootMethod::UEFI);
     }
+    early_init();
 
     main();
 }

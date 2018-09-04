@@ -222,7 +222,10 @@ fn run_test(config: &Config, name: &str) -> Result<(), TestFailReason> {
                     TestFailReason::FailedToPrepare(format!("Could not gather qemus output"))
                 })?.read_to_end(&mut child_stdout)
                 .map_err(|err| {
-                    TestFailReason::FailedToPrepare(format!("Could not kill qemu: {}", err))
+                    TestFailReason::FailedToPrepare(format!(
+                        "Could not gather qemus output: {}",
+                        err
+                    ))
                 })?;
 
             let output_str = from_utf8(&child_stdout[FORMATTING_OUTPUT_LENGTH..])

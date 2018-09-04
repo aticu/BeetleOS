@@ -5,6 +5,29 @@
 
 use core::fmt;
 
+/// Prints text to the screen.
+#[macro_export]
+macro_rules! print {
+    ($($arg:tt)*) => ({
+        use $crate::arch::Architecture;
+        $crate::arch::Arch::write_fmt(format_args!($($arg)*));
+    });
+}
+
+/// Prints a line to the screen.
+#[macro_export]
+macro_rules! println {
+    () => ({
+        use $crate::arch::Architecture;
+        $crate::arch::Arch::write_line_break();
+    });
+    ($($arg:tt)*) => ({
+        use $crate::arch::Architecture;
+        $crate::arch::Arch::write_fmt(format_args!($($arg)*));
+        $crate::arch::Arch::write_line_break();
+    });
+}
+
 #[cfg(target_arch = "x86_64")]
 #[macro_use]
 pub mod x86_64;
@@ -61,27 +84,4 @@ pub trait Architecture {
             Self::disable_interrupts();
         }
     }
-}
-
-/// Prints text to the screen.
-#[macro_export]
-macro_rules! print {
-    ($($arg:tt)*) => ({
-        use $crate::arch::Architecture;
-        $crate::arch::Arch::write_fmt(format_args!($($arg)*));
-    });
-}
-
-/// Prints a line to the screen.
-#[macro_export]
-macro_rules! println {
-    () => ({
-        use $crate::arch::Architecture;
-        $crate::arch::Arch::write_line_break();
-    });
-    ($($arg:tt)*) => ({
-        use $crate::arch::Architecture;
-        $crate::arch::Arch::write_fmt(format_args!($($arg)*));
-        $crate::arch::Arch::write_line_break();
-    });
 }

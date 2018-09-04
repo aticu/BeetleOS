@@ -9,6 +9,9 @@
 pub mod arch;
 pub mod sync;
 
+/// Sets the log level for the kernel.
+const LOG_LEVEL: log::LevelFilter = log::LevelFilter::Info;
+
 use crate::arch::{Arch, Architecture};
 
 /// The main function for the kernel.
@@ -21,10 +24,7 @@ pub fn main() -> ! {
     // They will be restored after this function.
     Arch::disable_interrupts();
 
-    println!("Hello {} from {}!", "UEFI", "BeetleOS");
-    print!("Test: ");
-    println!("Still on the same line!");
-    serial_println!("This is the serial output.");
+    log::debug!("Reached the main function.");
 
     Arch::enable_interrupts();
 

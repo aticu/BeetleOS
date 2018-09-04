@@ -2,14 +2,19 @@
 //!
 //! This abstracts the details of the x86_64 platform.
 
-pub mod uefi;
+mod architecture_implementation;
 #[macro_use]
 pub mod serial;
+mod logger;
+pub mod uefi;
 
-use core::fmt;
-use x86_64::instructions::interrupts;
+pub use self::architecture_implementation::x86_64;
 
-use super::Architecture;
+use raw_cpuid::CpuId;
+use x86_64::registers::{
+    control::{Cr0, Cr0Flags},
+    model_specific::{Efer, EferFlags},
+};
 
 /// The types of methods that the system can be booted with.
 enum BootMethod {
@@ -26,33 +31,72 @@ fn get_boot_method() -> &'static BootMethod {
     unsafe { BOOT_METHOD.as_ref().expect("Could not read boot method.") }
 }
 
-/// The struct that implements the architecture trait and repressents this architecture.
-#[allow(non_camel_case_types)]
-pub struct x86_64;
+/// Performs early initialization for the x86_64 architecture.
+fn early_init() {
+    // Initialize the logger. If initialization fails, logging won't work.
+    match log::set_logger(&logger::KERNEL_LOGGER) {
+        _ => (),
+    }
+    log::set_max_level(crate::LOG_LEVEL);
 
-impl Architecture for x86_64 {
-    fn write_fmt(args: fmt::Arguments) {
-        match get_boot_method() {
-            BootMethod::UEFI => uefi::write_fmt(args),
+    // Check that the CPU supports the necessary features.
+    let cpuid = CpuId::new();
+
+    let mut compatible = true;
+
+    if let Some(features) = cpuid.get_feature_info() {
+        if !features.has_apic() {
+            log::error!("No APIC found.");
+            compatible = false;
+        }
+    } else {
+        log::error!("No APIC found.");
+        compatible = false;
+    }
+
+    if let Some(features) = cpuid.get_extended_function_info() {
+        if !features.has_syscall_sysret() {
+            log::error!("Syscall/sysret not supported.");
+            compatible = false;
+        }
+        if !features.has_execute_disable() {
+            log::error!("NXE bit not supported.");
+            compatible = false;
+        }
+    } else {
+        log::error!("Syscall/sysret not supported.");
+        log::error!("NXE bit not supported.");
+        compatible = false;
+    }
+
+    if compatible {
+        log::debug!("The CPU is compatible with BeetleOS.")
+    } else {
+        panic!("Your computer is not compatible with BeetleOS.");
+    }
+
+    if let Some(vendor_info) = cpuid.get_vendor_info() {
+        if let Some(features) = cpuid.get_extended_function_info() {
+            if let Some(model_name) = features.processor_brand_string() {
+                log::info!(
+                    "Starting BeetleOS on a {} CPU (Model: {}).",
+                    vendor_info,
+                    model_name.trim()
+                );
+            }
         }
     }
 
-    fn write_line_break() {
-        match get_boot_method() {
-            BootMethod::UEFI => uefi::write_fmt(format_args!("\r\n")),
-        }
-    }
+    // Enable the required features
+    // This is safe, because only some features are enabled and they don't corrupt memory safety when enabling them at this stage
+    unsafe {
+        // Enable syscall/sysret and the NXE bit
+        Efer::update(|flags| {
+            flags.insert(EferFlags::SYSTEM_CALL_EXTENSIONS | EferFlags::NO_EXECUTE_ENABLE);
+        });
 
-    fn interrupts_enabled() -> bool {
-        interrupts::are_enabled()
-    }
-
-    fn enable_interrupts() {
-        interrupts::enable()
-    }
-
-    fn disable_interrupts() {
-        interrupts::disable()
+        // Disable writing to read-only pages from kernel
+        Cr0::update(|flags| flags.insert(Cr0Flags::WRITE_PROTECT));
     }
 }
 
@@ -63,13 +107,15 @@ pub fn exit_integration_test(exit_code: IntegrationTestExitCode) -> ! {
 
     let mut exit_port = Port::<u32>::new(0xf4);
 
-    unsafe {
-        match exit_code {
-            IntegrationTestExitCode::Success => exit_port.write(0),
-            IntegrationTestExitCode::Failure(message) => {
-                serial_print!("{}", message);
-                exit_port.write(1)
-            }
+    match exit_code {
+        IntegrationTestExitCode::Success => {
+            // This is safe because it runs on qemu and the port is mapped to exit qemu when written to
+            unsafe { exit_port.write(0) }
+        }
+        IntegrationTestExitCode::Failure(message) => {
+            serial_print!("{}", message);
+            // This is safe because it runs on qemu and the port is mapped to exit qemu when written to
+            unsafe { exit_port.write(1) }
         }
     }
 
