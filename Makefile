@@ -30,6 +30,14 @@ clean:
 run: $(ISO)
 	qemu-system-$(ARCH) $(QEMU_FLAGS) -cdrom $<
 
+.PHONY: debug
+debug: $(ISO)
+	qemu-system-$(ARCH) $(QEMU_FLAGS) -cdrom $< -S -d guest_errors
+
+.PHONY: doc
+doc:
+	cargo doc --all-features --lib
+
 .PHONY: test
 test: $(BUILD_DIR)/release/test_runner
 	$< $(ARCH) --target-triple=$(KERNEL_BUILD_TARGET) $(RUST_RELEASE) \

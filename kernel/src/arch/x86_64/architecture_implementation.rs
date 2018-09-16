@@ -2,10 +2,10 @@
 
 use core::fmt;
 
-use x86_64::instructions::interrupts;
+use ::x86_64::instructions::interrupts;
 
 use crate::arch::{
-    x86_64::{get_boot_method, uefi, BootMethod},
+    x86_64::{get_boot_method, serial, uefi, BootMethod},
     Architecture,
 };
 
@@ -16,13 +16,19 @@ pub struct x86_64;
 impl Architecture for x86_64 {
     fn write_fmt(args: fmt::Arguments) {
         match get_boot_method() {
-            BootMethod::UEFI => uefi::write_fmt(args),
+            BootMethod::UEFI(uefi::Status::BootServicesActive) => uefi::write_fmt(args),
+            BootMethod::UEFI(uefi::Status::BootServicesInactive) => serial::write_fmt(args),
         }
     }
 
     fn write_line_break() {
         match get_boot_method() {
-            BootMethod::UEFI => uefi::write_fmt(format_args!("\r\n")),
+            BootMethod::UEFI(uefi::Status::BootServicesActive) => {
+                uefi::write_fmt(format_args!("\r\n"))
+            }
+            BootMethod::UEFI(uefi::Status::BootServicesInactive) => {
+                serial::write_fmt(format_args!("\n"))
+            }
         }
     }
 

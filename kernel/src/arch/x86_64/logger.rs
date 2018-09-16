@@ -37,7 +37,6 @@ impl Log for KernelLogger {
                 serial_println!("{}{}{}: {}", warn, record.level(), reset, record.args());
             }
             Level::Info => {
-                println!("{}", record.args());
                 serial_println!("{}", record.args());
             }
             Level::Debug => {

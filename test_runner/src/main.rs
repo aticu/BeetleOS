@@ -378,7 +378,7 @@ fn compile_test(config: &Config, name: &str) -> Result<(), TestFailReason> {
         .arg("--color")
         .arg("always")
         .arg("--features")
-        .arg(format!("{} integration_test", config.run_on))
+        .arg(format!("{}_integration_test", config.run_on))
         .arg(format!("--target={}", config.target_triple))
         .arg(format!("--bin={}", name));
 

@@ -30,4 +30,5 @@ QEMU_FLAGS := --no-reboot \
 			  -s \
 			  -serial stdio \
 			  -net none \
+			  -display none \
 			  -bios $(OVMF)

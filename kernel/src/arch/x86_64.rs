@@ -11,7 +11,7 @@ pub mod uefi;
 pub use self::architecture_implementation::x86_64;
 
 use raw_cpuid::CpuId;
-use x86_64::registers::{
+use ::x86_64::registers::{
     control::{Cr0, Cr0Flags},
     model_specific::{Efer, EferFlags},
 };
@@ -19,7 +19,7 @@ use x86_64::registers::{
 /// The types of methods that the system can be booted with.
 enum BootMethod {
     /// The system was booted directly by the UEFI firmware.
-    UEFI,
+    UEFI(uefi::Status),
 }
 
 /// The method used to boot the system.
@@ -101,9 +101,9 @@ fn early_init() {
 }
 
 /// Exits qemu during an integration test.
-#[cfg(all(feature = "integration_test", feature = "qemu"))]
+#[cfg(feature = "qemu_integration_test")]
 pub fn exit_integration_test(exit_code: IntegrationTestExitCode) -> ! {
-    use x86_64::instructions::port::Port;
+    use ::x86_64::instructions::port::Port;
 
     let mut exit_port = Port::<u32>::new(0xf4);
 
@@ -123,7 +123,7 @@ pub fn exit_integration_test(exit_code: IntegrationTestExitCode) -> ! {
 }
 
 /// The possible exit codes for integration tests.
-#[cfg(feature = "integration_test")]
+#[cfg(any(feature = "qemu_integration_test"))]
 pub enum IntegrationTestExitCode {
     /// The test was successful.
     Success,

@@ -1,5 +1,3 @@
-cargo-features = ["edition"]
-
 [package]
 name = "kernel"
 version = "0.1.0"
@@ -11,16 +9,14 @@ license = "MIT"
 edition = "2018"
 
 [features]
-integration_test = []
-qemu = []
+qemu_integration_test = []
 
 [dependencies]
-lazy_static = { version = "1.1.0", features = ["spin_no_std"] }
-log = "0.4.4"
+lazy_static = { version = "1", features = ["spin_no_std"] }
+log = "0.4"
 
 [target.'cfg(target_arch = "x86_64")'.dependencies]
-efi = { git = "https://github.com/reynoldsbd/libefi" }
-uart_16550 = "0.1.0"
-x86_64 = "0.2.11"
-raw-cpuid = "2.0.0"
-#x86 = "0.10.0"
+nuefil = { git = "https://github.com/aticu/nuefil" }
+uart_16550 = "0.1"
+x86_64 = "0.2"
+raw-cpuid = "2"

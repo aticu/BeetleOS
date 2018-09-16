@@ -2,23 +2,21 @@
 //!
 //! Most of the actual kernel code can be found in the library.
 
-#![feature(panic_handler)]
 #![no_std]
 #![no_main]
 
 use core::panic::PanicInfo;
-use efi::{
-    types::{EfiRt, Handle},
-    SystemTable,
-};
-use kernel::{arch::x86_64::uefi::uefi_start, println};
+use kernel::{arch::x86_64::uefi::uefi_init, main, println};
+use nuefil::{system::SystemTable, Handle};
 
 /// The entry point for the UEFI loader.
 ///
 /// This is the first function that gets called by the UEFI firmware.
 #[no_mangle]
-pub extern "C" fn efi_main(image_handle: Handle, system_table: EfiRt<SystemTable>) -> ! {
-    uefi_start(image_handle, system_table);
+pub extern "C" fn efi_main(image_handle: Handle, system_table: &'static SystemTable) -> ! {
+    uefi_init(image_handle, system_table);
+
+    main();
 }
 
 /// The panic implementation of BeetleOS.
