@@ -20,3 +20,4 @@ nuefil = { git = "https://github.com/aticu/nuefil" }
 uart_16550 = "0.1"
 x86_64 = "0.2"
 raw-cpuid = "2"
+atomic = { version = "0.3", features = ["nightly"] }

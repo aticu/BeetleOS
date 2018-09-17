@@ -10,6 +10,7 @@ pub mod uefi;
 
 pub use self::architecture_implementation::x86_64;
 
+use atomic::{Atomic, Ordering};
 use raw_cpuid::CpuId;
 use ::x86_64::registers::{
     control::{Cr0, Cr0Flags},
@@ -17,18 +18,20 @@ use ::x86_64::registers::{
 };
 
 /// The types of methods that the system can be booted with.
+#[derive(Clone, Copy)]
 enum BootMethod {
     /// The system was booted directly by the UEFI firmware.
     UEFI(uefi::Status),
 }
 
 /// The method used to boot the system.
-static mut BOOT_METHOD: Option<BootMethod> = None;
+static BOOT_METHOD: Atomic<Option<BootMethod>> = Atomic::new(None);
 
 /// Returns the current boot method.
-fn get_boot_method() -> &'static BootMethod {
-    // This is safe under the assumption that the boot method will be set early on (before this is called) and never changed.
-    unsafe { BOOT_METHOD.as_ref().expect("Could not read boot method.") }
+fn get_boot_method() -> BootMethod {
+    BOOT_METHOD
+        .load(Ordering::SeqCst)
+        .expect("Could not read boot method.")
 }
 
 /// Performs early initialization for the x86_64 architecture.
