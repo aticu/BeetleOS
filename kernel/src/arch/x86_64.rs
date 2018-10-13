@@ -48,12 +48,20 @@ fn early_init() {
     let mut compatible = true;
 
     if let Some(features) = cpuid.get_feature_info() {
+        if !features.has_msr() {
+            log::error!("RDMSR and WRMSR not supported.");
+            compatible = false;
+        }
         if !features.has_apic() {
             log::error!("No APIC found.");
             compatible = false;
         }
+        if !features.has_pge() {
+            log::error!("The page global bit is not supported.");
+            compatible = false;
+        }
     } else {
-        log::error!("No APIC found.");
+        log::error!("Could not get CPUID feature information.");
         compatible = false;
     }
 
@@ -67,8 +75,7 @@ fn early_init() {
             compatible = false;
         }
     } else {
-        log::error!("Syscall/sysret not supported.");
-        log::error!("NXE bit not supported.");
+        log::error!("Could not get CPUID extended function information.");
         compatible = false;
     }
 

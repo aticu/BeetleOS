@@ -36,7 +36,11 @@ debug: $(ISO)
 
 .PHONY: doc
 doc:
-	cargo doc --all-features --lib
+	cargo doc --all-features --lib --document-private-items
+
+.PHONY: doc_open
+doc_open:
+	cargo doc --all-features --lib --document-private-items --open -p kernel
 
 .PHONY: test
 test: $(BUILD_DIR)/release/test_runner

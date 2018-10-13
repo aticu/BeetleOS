@@ -4,7 +4,8 @@
 
 use atomic::{Atomic, Ordering};
 use core::fmt::{self, Write};
-use nuefil::{system::SystemTable, Handle};
+use nuefil::{memory::NamedMemoryType, system::SystemTable, Handle};
+use size_format::SizeFormatterBinary;
 
 use super::{early_init, BootMethod, BOOT_METHOD};
 
@@ -40,16 +41,16 @@ pub fn uefi_init(image_handle: Handle, system_table: &'static SystemTable) {
     let mut total_pages = 0;
 
     for entry in memory_map.iter() {
-        if entry.Type == nuefil::memory::MemoryType::ConventionalMemory {
+        if entry.Type == NamedMemoryType::ConventionalMemory.into() {
             usable_pages += entry.NumberOfPages;
         }
         total_pages += entry.NumberOfPages;
     }
 
     log::info!(
-        "The usable amount of memory is {}MiB, the total amount of memory is {}MiB.",
-        usable_pages / 256,
-        total_pages / 256
+        "The usable amount of memory is {}B, the total amount of memory is {}B.",
+        SizeFormatterBinary::new(usable_pages * 0x1000),
+        SizeFormatterBinary::new(total_pages * 0x1000)
     );
 }
 
