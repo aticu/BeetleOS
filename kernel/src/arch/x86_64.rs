@@ -8,30 +8,28 @@ pub mod serial;
 mod logger;
 pub mod uefi;
 
-pub use self::architecture_implementation::x86_64;
-
-use atomic::{Atomic, Ordering};
 use raw_cpuid::CpuId;
-use ::x86_64::registers::{
+use x86_64_crate::registers::{
     control::{Cr0, Cr0Flags},
     model_specific::{Efer, EferFlags},
 };
+
+pub use self::architecture_implementation::x86_64;
+pub use crate::sync::GlobalRuntimeConfiguration;
 
 /// The types of methods that the system can be booted with.
 #[derive(Clone, Copy)]
 enum BootMethod {
     /// The system was booted directly by the UEFI firmware.
-    UEFI(uefi::Status),
+    UEFI,
 }
 
 /// The method used to boot the system.
-static BOOT_METHOD: Atomic<Option<BootMethod>> = Atomic::new(None);
+static BOOT_METHOD: GlobalRuntimeConfiguration<BootMethod> = GlobalRuntimeConfiguration::new();
 
 /// Returns the current boot method.
 fn get_boot_method() -> BootMethod {
-    BOOT_METHOD
-        .load(Ordering::SeqCst)
-        .expect("Could not read boot method.")
+    *BOOT_METHOD.get().expect("Could not read boot method.")
 }
 
 /// Performs early initialization for the x86_64 architecture.
@@ -113,7 +111,7 @@ fn early_init() {
 /// Exits qemu during an integration test.
 #[cfg(feature = "qemu_integration_test")]
 pub fn exit_integration_test(exit_code: IntegrationTestExitCode) -> ! {
-    use ::x86_64::instructions::port::Port;
+    use x86_64_crate::instructions::port::Port;
 
     let mut exit_port = Port::<u32>::new(0xf4);
 

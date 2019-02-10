@@ -10,7 +10,7 @@ use core::{
     marker::Sync,
     ops::{Deref, DerefMut, Drop},
     option::Option::{self, None, Some},
-    sync::atomic::{spin_loop_hint, AtomicBool, Ordering, ATOMIC_BOOL_INIT},
+    sync::atomic::{spin_loop_hint, AtomicBool, Ordering},
 };
 
 use super::{disable_preemption, PreemptionState};
@@ -51,7 +51,7 @@ impl<T> Mutex<T> {
     /// Creates a new spinlock wrapping the supplied data.
     pub const fn new(user_data: T) -> Mutex<T> {
         Mutex {
-            lock: ATOMIC_BOOL_INIT,
+            lock: AtomicBool::new(false),
             data: UnsafeCell::new(user_data),
         }
     }

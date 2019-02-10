@@ -1,9 +1,9 @@
 //! This modules handles synchronization in the kernel.
 
+mod global_runtime_configuration;
 mod mutex;
 
-pub use self::mutex::Mutex;
-
+pub use self::{global_runtime_configuration::GlobalRuntimeConfiguration, mutex::Mutex};
 use crate::arch::{Arch, Architecture};
 
 /// Saves the state when disabling preemtion, so it can be restored later when dropping.

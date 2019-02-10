@@ -2,26 +2,24 @@
 //!
 //! This gets invoked, when the kernel is loaded directly by UEFI.
 
-use atomic::{Atomic, Ordering};
 use core::fmt::{self, Write};
 use nuefil::{memory::NamedMemoryType, system::SystemTable, Handle};
 use size_format::SizeFormatterBinary;
 
 use super::{early_init, BootMethod, BOOT_METHOD};
+use crate::sync::GlobalRuntimeConfiguration;
 
 /// A reference to the UEFI system table.
-static SYSTEM_TABLE: Atomic<Option<&'static SystemTable>> = Atomic::new(None);
+static SYSTEM_TABLE: GlobalRuntimeConfiguration<&'static SystemTable> =
+    GlobalRuntimeConfiguration::new();
 
 /// The entry point for UEFI applications.
 pub fn uefi_init(image_handle: Handle, system_table: &'static SystemTable) {
-    SYSTEM_TABLE.store(Some(system_table), Ordering::SeqCst);
-    BOOT_METHOD.store(
-        Some(BootMethod::UEFI(Status::BootServicesActive)),
-        Ordering::SeqCst,
-    );
+    SYSTEM_TABLE.init(system_table);
+    BOOT_METHOD.init(BootMethod::UEFI);
 
     // Fail silently if the screen cannot be cleared.
-    let _ = get_system_table().ConsoleOut.clear_screen();
+    get_system_table().ConsoleOut.clear_screen().ok();
 
     early_init();
 
@@ -32,10 +30,7 @@ pub fn uefi_init(image_handle: Handle, system_table: &'static SystemTable) {
         .exit_boot_services(image_handle)
         .expect("Could not exit UEFI boot services.");
 
-    BOOT_METHOD.store(
-        Some(BootMethod::UEFI(Status::BootServicesInactive)),
-        Ordering::SeqCst,
-    );
+    // The boot services are now disabled.
 
     let mut usable_pages = 0;
     let mut total_pages = 0;
@@ -56,23 +51,18 @@ pub fn uefi_init(image_handle: Handle, system_table: &'static SystemTable) {
 
 /// Writes the formatted string.
 pub(super) fn write_fmt(args: fmt::Arguments) {
-    (&*get_system_table().ConsoleOut)
-        .write_fmt(args)
-        .expect("Could not output to UEFI output.")
+    let mut console_out = &*get_system_table().ConsoleOut;
+
+    if console_out as *const _ as usize != 0 {
+        console_out
+            .write_fmt(args)
+            .expect("Could not output to UEFI output.");
+    }
 }
 
 /// Returns a reference to the system table.
 fn get_system_table() -> &'static SystemTable {
     SYSTEM_TABLE
-        .load(Ordering::SeqCst)
+        .get()
         .expect("Could not read UEFI system table.")
-}
-
-/// Represents the statuses the UEFI kernel can be in.
-#[derive(Clone, Copy)]
-pub(super) enum Status {
-    /// The boot services are still active.
-    BootServicesActive,
-    /// The boot services are inactive.
-    BootServicesInactive,
 }

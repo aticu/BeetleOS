@@ -14,11 +14,11 @@ qemu_integration_test = []
 [dependencies]
 lazy_static = { version = "1", features = ["spin_no_std"] }
 log = "0.4"
+spin = "0.5"
 
 [target.'cfg(target_arch = "x86_64")'.dependencies]
 nuefil = { git = "https://github.com/aticu/nuefil" }
 uart_16550 = "0.1"
-x86_64 = "0.2"
+x86_64_crate = { package="x86_64", version = "0.2" }
 raw-cpuid = "2"
-atomic = { version = "0.3", features = ["nightly"] }
 size_format = "1"

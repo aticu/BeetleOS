@@ -2,7 +2,6 @@
 //!
 //! It is a µ-kernel implemented in Rust.
 
-#![feature(const_fn)]
 #![no_std]
 
 #[macro_use]
