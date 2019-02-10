@@ -6,6 +6,7 @@ mod architecture_implementation;
 #[macro_use]
 pub mod serial;
 mod logger;
+mod memory;
 pub mod uefi;
 
 use raw_cpuid::CpuId;

@@ -6,6 +6,7 @@
 
 #[macro_use]
 pub mod arch;
+pub mod memory;
 pub mod sync;
 
 /// Sets the log level for the kernel.

@@ -220,7 +220,8 @@ fn run_test(config: &Config, name: &str) -> Result<(), TestFailReason> {
                 .stdout
                 .ok_or_else(|| {
                     TestFailReason::FailedToPrepare(format!("Could not gather qemus output"))
-                })?.read_to_end(&mut child_stdout)
+                })?
+                .read_to_end(&mut child_stdout)
                 .map_err(|err| {
                     TestFailReason::FailedToPrepare(format!(
                         "Could not gather qemus output: {}",
@@ -557,7 +558,8 @@ fn get_config() -> Result<Config, String> {
                     } else {
                         "debug"
                     })
-                }).map_err(|dir_err| format!("{}", dir_err))
+                })
+                .map_err(|dir_err| format!("{}", dir_err))
         })?;
     let rust_target_path = matches
         .value_of("rust-target-path")

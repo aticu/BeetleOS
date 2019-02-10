@@ -2,18 +2,24 @@
 
 use core::fmt;
 
-use x86_64_crate::instructions::interrupts;
+use x86_64_crate::{instructions::interrupts, PhysAddr, VirtAddr};
 
 use crate::arch::{
     x86_64::{get_boot_method, serial, uefi, BootMethod},
     Architecture,
 };
 
-/// The struct that implements the architecture trait and repressents this architecture.
+/// The struct that implements the architecture trait and represents this architecture.
 #[allow(non_camel_case_types)]
 pub struct x86_64;
 
 impl Architecture for x86_64 {
+    type PhysicalAddressType = PhysAddr;
+
+    type VirtualAddressType = VirtAddr;
+
+    const PAGE_SIZE: usize = 0x1000;
+
     fn write_fmt(args: fmt::Arguments) {
         match get_boot_method() {
             BootMethod::UEFI => {

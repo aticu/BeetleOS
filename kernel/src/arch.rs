@@ -36,12 +36,31 @@ pub mod x86_64;
 #[cfg(target_arch = "x86_64")]
 pub type Arch = x86_64::x86_64;
 
+/// The underlying type of a physical address on the target architecture.
+///
+/// This just references the type of the `Architecture` implementation and is a shorthand for convenience.
+pub type PhysicalAddressType = <Arch as Architecture>::PhysicalAddressType;
+
+/// The underlying type of a virtual address on the target architecture.
+///
+/// This just references the type of the `Architecture` implementation and is a shorthand for convenience.
+pub type VirtualAddressType = <Arch as Architecture>::VirtualAddressType;
+
 /// This type represents an abstraction of the underlying architecture.
 ///
 /// Each supported architecture implements this trait on a type which is then used for architecture specific actions.
 ///
 /// Using a trait here ensures that all the functions are implemented correctly by the corresponding architecture.
 pub trait Architecture {
+    /// The underlying type of a physical address on the target architecture.
+    type PhysicalAddressType;
+
+    /// The underlying type of a virtual address on the target architecture.
+    type VirtualAddressType;
+
+    /// The size of a single page of memory in bytes.
+    const PAGE_SIZE: usize;
+
     /// Writes the formatted string to the screen.
     fn write_fmt(args: fmt::Arguments);
 
